@@ -7,7 +7,11 @@ from scipy import interpolate
 from astropy import units as apu
 
 __all__ = ['cart2pol', 'co_matrices', 'line_equation', 'rms', 'norm', 'snr']
+def norm_min_max(P, Pmin, Pmax, axis = None):
+    P_norm = (P - P.min(axis).reshape(-1, 1)) / (
+        P.max(axis) - P.min(axis)).reshape(-1, 1)
 
+    return np.nan_to_num(P_norm)
 
 def norm(P, axis=None):
     """
