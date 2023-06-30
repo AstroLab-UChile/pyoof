@@ -97,7 +97,9 @@ def extract_data_pyoof(pathfits):
     obs_object = hdulist[0].header['OBJECT']
     obs_date = hdulist[0].header['DATE_OBS']
     n_maps = hdulist[0].header['NMAPS']
+    noise = hdulist[0].header['NOISE']
     beam_data = np.array([hdulist[i].data['BEAM'] for i in range(1,n_maps+1)])
+    power = np.array([hdulist[i].data['POWER'] for i in range(1,n_maps+1)])
     u_data = np.array([hdulist[i].data['U'] for i in range(1,n_maps+1)]) * apu.rad
     v_data = np.array([hdulist[i].data['V'] for i in range(1,n_maps+1)]) * apu.rad
     d_z = np.array([hdulist[i].header['DZ'] for i in range(1,n_maps+1)]) * apu.m
@@ -117,7 +119,9 @@ def extract_data_pyoof(pathfits):
             "meanel": meanel,
             "beam_data": beam_data,
             "u_data": u_data,
-            "v_data": v_data}
+            "v_data": v_data,
+            'power': power,
+            'noise': noise}
 
     return data
 

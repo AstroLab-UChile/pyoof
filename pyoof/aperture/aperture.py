@@ -343,7 +343,7 @@ def phase(K_coeff, pr, piston, tilt, resolution=1000):
     W = wavefront(rho=r_norm, theta=t, K_coeff=_K_coeff)
     W[(x_grid ** 2 + y_grid ** 2 > pr ** 2)] = 0
 
-    phi = W * 2 * np.pi * apu.rad  # Aperture phase distribution in radians
+    phi = W * 2 * np.pi *apu.rad   # Aperture phase distribution in radians
 
     return x, y, phi
 
@@ -427,7 +427,8 @@ def aperture(x, y, I_coeff, K_coeff, d_z, wavel, illum_func, telgeo):
     Ea = illum_func(x=x, y=y, I_coeff=I_coeff, pr=pr)  # Illumination function
 
     # Transformation: wavefront (aberration) distribution -> phase-error
-    phi = (W + delta / wavel) * 2 * np.pi * apu.rad
+
+    phi = (W/wavel *2*np.pi+ delta / wavel) * 2 * np.pi * apu.rad
     # phase-error plus the OPD function
 
     with apu.set_enabled_equivalencies(apu.dimensionless_angles()):

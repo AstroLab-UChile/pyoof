@@ -127,7 +127,7 @@ def plot_beam(
             (-s_bw + v_offset).to_value(apu.rad),
             (s_bw + v_offset).to_value(apu.rad)
             ] * apu.rad
-
+    print(plim)
     plim = plim.to_value(angle)
     plim_u, plim_v = plim[:2], plim[2:]
 
@@ -209,6 +209,7 @@ def plot_beam_data_multifrequency(data, resolution, angle, title, res_mode):
             figs.append(fig)
 
     return figs
+
 def plot_beam_data(
     u_data, v_data, beam_data, d_z, resolution, angle, title, res_mode
         ):
@@ -395,6 +396,12 @@ def plot_phase_difference(K1, K2, pr, piston, tilt, title):
 
     return fig
 
+from pyoof.aperture import phase
+import matplotlib.pyplot as plt
+import warnings
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from math import ceil, floor
+
 def plot_phase(K_coeff, pr, piston, tilt, title):
     """
     Aperture phase distribution (phase-error), :math:`\\varphi(x, y)`, figure,
@@ -444,32 +451,31 @@ def plot_phase(K_coeff, pr, piston, tilt, title):
             )
     else:
         cbartitle = '$\\varphi(x, y)$ amplitude rad'
-
+    
     extent = [-pr.to_value(apu.m), pr.to_value(apu.m)] * 2
-    levels = np.linspace(-2, 2, 9)  # radians
     _x, _y, _phase = phase(K_coeff=K_coeff, pr=pr, tilt=tilt, piston=piston)
-
+    levels = np.arange(floor(_phase.min().value), ceil(_phase.max().value), 0.2)  # radians
+    print(_phase.min())
     fig, ax = plt.subplots(figsize=(6, 5.8))
-
     im = ax.imshow(X=_phase.to_value(apu.rad), extent=extent)
 
     # Partial solution for contour Warning
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        ax.contour(
+        countour = ax.contour(
             _x.to_value(apu.m),
             _y.to_value(apu.m),
             _phase.to_value(apu.rad),
             levels=levels,
-            colors='k',
-            alpha=0.3
+            colors=["white"],
+            alpha=1,
             )
-
+    
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad=0.03)
     cb = fig.colorbar(im, cax=cax)
     cb.ax.set_ylabel(cbartitle)
-
+    plt.clabel(countour, inline=True, fontsize=15, colors = "white")
     ax.set_title(title)
     ax.set_ylabel('$y$ m')
     ax.set_xlabel('$x$ m')
@@ -782,7 +788,7 @@ def plot_fit_path(
     fig_res = plot_beam_data(
         u_data=u_data,
         v_data=v_data,
-        beam_data=res[:, 0:u_data.shape[1]],
+        beam_data=res,
         d_z=d_z,
         resolution=resolution,
         title='residual',

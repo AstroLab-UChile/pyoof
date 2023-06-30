@@ -142,7 +142,7 @@ def simulate_data_pyoof(
         power_trim_1d = power_pattern[~np.isnan(power_pattern)]
         size_trim = int(np.sqrt(power_trim_1d.size))  # new size of the box
 
-
+ 
         # Box to be trimmed in uu and vv meshed arrays
         box = (
             (plim_u[0] < uu) & (plim_u[1] > uu) &
@@ -153,7 +153,7 @@ def simulate_data_pyoof(
         power_trim = power_trim_1d.reshape(size_trim, size_trim)
         u_trim = uu[box].reshape(size_trim, size_trim)
         v_trim = vv[box].reshape(size_trim, size_trim)
-
+        print(power_trim.shape)
         u.append(u_trim)
         v.append(v_trim)
         P.append(power_trim)
@@ -170,6 +170,7 @@ def simulate_data_pyoof(
     u_to_save = [u[i].to_value(apu.rad).flatten() for i in range(len(d_z))]
     v_to_save = [v[i].to_value(apu.rad).flatten() for i in range(len(d_z))]
     p_to_save = [power_noise[i].flatten() for i in range(len(d_z))]
+    p_no_noise_to_save = [P[i].flatten() for i in range(len(d_z))]
 
     # Writing default fits file for OOF observations
     hdu_tables = []
@@ -177,7 +178,8 @@ def simulate_data_pyoof(
         table_hdu = fits.BinTableHDU.from_columns([
         fits.Column(name='U', format='E', array=u_to_save[i]),
         fits.Column(name='V', format='E', array=v_to_save[i]),
-        fits.Column(name='BEAM', format='E', array=p_to_save[i])
+        fits.Column(name='BEAM', format='E', array=p_to_save[i]),
+        fits.Column(name = 'POWER', format ='E', array=p_no_noise_to_save[i])
         ])
         hdu_tables.append(table_hdu)
 
@@ -214,6 +216,7 @@ def simulate_data_pyoof(
     prihdr['COMMENT'] = 'Generated data pyoof package'
     prihdr['AUTHOR'] = 'Tomas Cassanelli'
     prihdr['NMAPS'] = len(d_z)
+    prihdr['NOISE'] = noise
     prihdu = fits.PrimaryHDU(header=prihdr)
 
     pyoof_fits = fits.HDUList(
